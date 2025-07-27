@@ -8,12 +8,10 @@ public class Lista {
 
   List<Miembro> miembros = new ArrayList<Miembro>();
   ModoDeSuscripcion modoDeSuscripcion;
-  MailSender mailSender;
   ValidadorDeEnvio validadorDeEnvio;
 
-  Lista(ModoDeSuscripcion modoDeSuscripcion, MailSender mailSender, ValidadorDeEnvio validadorDeEnvio) {
+  Lista(ModoDeSuscripcion modoDeSuscripcion, ValidadorDeEnvio validadorDeEnvio) {
     this.modoDeSuscripcion = modoDeSuscripcion;
-    this.mailSender = mailSender;
     this.validadorDeEnvio = validadorDeEnvio;
   }
 
@@ -21,22 +19,14 @@ public class Lista {
     modoDeSuscripcion.suscribir(miembro, this);
   }
 
-  public void enviarMensaje(Post post) {
+  public void enviarMensaje(Post post, EnvioDeMensaje envio) {
     validadorDeEnvio.validarEnvio(post, this);
-    mailSender.enviarMail(
-        new Mail(
-            post.remitente.email,
-            this.getDestinatarios(post),
-            post.titulo,
-            post.texto
-        )
-    );
+    envio.enviarMensaje(post, this);
   }
 
-  public String getDestinatarios(Post post) {
+  public List<Miembro> getDestinatarios(Post post) {
     return miembros.stream()
         .filter(miembro -> miembro != post.remitente)
-        .map(miembro -> miembro.email)
-        .collect(Collectors.joining(", "));
+        .collect(Collectors.toList());
   }
 }
